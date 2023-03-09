@@ -5,11 +5,13 @@ from bs4 import BeautifulSoup
 
 def main():
 
+    # получение картинки по прямому адресу
     # url = "https://dvmn.org/media/Requests_Python_Logo.png"
     # image = get_image(url).content
     # filename = Path(url).name
     # save_image(image, filename)
-    #
+
+    # получение картинки по косвенному адресуб в котором адрес
     # url = "https://dvmn.org/filer/canonical/1542890876/16/"
     # response = get_image(url)
     # image_url = response.url
@@ -20,34 +22,42 @@ def main():
     file_dir = Path.cwd().joinpath('Books')
     file_dir.mkdir(parents=True, exist_ok=True)
 
-    book_page_url_basis = 'https://tululu.org/b'
-
-    for book_id in range(20000, 20005):
-        book_page_url = f'{book_page_url_basis}{book_id}'
-        save_book(book_page_url, file_dir)
+    for book_id in range(1, 11):
+        print(f'book_id = {book_id}')
+        save_book(book_id, file_dir)
 
 
-def save_book(book_page_url, file_dir):
-    basis_url = 'https://tululu.org/txt.php?id='
-    page_title = ''
+def check_for_redirect(book_page):
+    book_page.raise_for_status()
+    if book_page.url == 'https://tululu.org/':
+        try:
+            raise requests.HTTPError('Error page', book_page.request)
+        except requests.HTTPError as error:
+            return error
 
-    reqs = requests.get(book_page_url)
-    reqs.raise_for_status()
-    soup = BeautifulSoup(reqs.text, 'html.parser')
-    # get page title
-    for title in soup.find_all('title'):
-        page_title = title.get_text()
+
+def save_book(book_id, file_dir):
+
+    book_file_basis_url = 'https://tululu.org/txt.php?id='
+
+    book_page_url = f'https://tululu.org/b{book_id}'
+    book_page = requests.get(book_page_url)
+    if check_for_redirect(book_page):
+        print('Книга не найдена')
 
     book_id = Path(book_page_url).name[1:]
-    txt_book_url = f'{basis_url}{book_id}'
+    txt_book_url = f'{book_file_basis_url}{book_id}'
 
     txt_book = requests.get(txt_book_url)
     txt_book.raise_for_status()
-    # print(txt_book.headers)
-    # print(txt_book.headers.values())
     if 'Content-Disposition' in txt_book.headers:
+        # get page title
+        page_content = BeautifulSoup(book_page.text, 'html.parser')
+        for title in page_content.find_all('title'):
+            page_title = title.get_text()
+            print(page_title)
         if 'filename' in txt_book.headers['Content-Disposition']:
-            with open(file_dir.joinpath(f'{page_title.split(",")[0]}.txt'), 'wb') as file:
+            with open(file_dir.joinpath(f'{book_id}.txt'), 'wb') as file:
                 file.write(txt_book.content)
 
 
