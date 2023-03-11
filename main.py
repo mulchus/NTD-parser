@@ -54,14 +54,20 @@ def save_book(book_id, file_dir):
         # get page title
         page_content = BeautifulSoup(book_page.text, 'lxml')
 
-        page_title = page_content.find('head').find('title')
-        print(page_title.text)
+        # page_title = page_content.find('head').find('title')
+        # print(page_title.text)
+
+        book_name = page_content.find('body').find('div', id="content").find('h1')
+        print(book_name.text.split('::')[0].rstrip())
+
+        book_author = page_content.find('body').find('div', id="content").find('h1').find('a')
+        print(book_author.text)
 
         img_url = f"https://tululu.org{page_content.find('div', class_='bookimage').find('img')['src']}"
         print(img_url)
 
-        book_description = page_content.find('table', class_='d_book').find('table', class_='d_book').find('td')
-        print(book_description)
+        book_description = page_content.find_all('table', class_='d_book')[1].find('td')
+        print(book_description.text)
 
         # for title in page_content.find_all('title'):
         #     page_title = title.get_text()
