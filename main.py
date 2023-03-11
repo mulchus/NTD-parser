@@ -33,7 +33,7 @@ def main():
 
     book_file_basis_url = 'https://tululu.org/txt.php?id='
 
-    for book_id in range(1, 11):
+    for book_id in range(5, 11):
         print('\n', f'book_id = {book_id}')
         txt_book_url = f'{book_file_basis_url}{book_id}'
         txt_book = requests.get(txt_book_url)
@@ -62,6 +62,10 @@ def main():
             img_url = f"https://tululu.org{page_content.find('div', class_='bookimage').find('img')['src']}"
             # print(img_url)
             download_image(img_url, book_name, IMAGE_DIR)
+
+            comments = page_content.find('div', class_='texts').find_all_next('span', class_='black')
+            for comment in comments:
+                print(comment.text)
 
             # book_description = page_content.find_all('table', class_='d_book')[1].find('td')
             # if book_description.text:
