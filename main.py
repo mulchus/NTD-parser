@@ -1,6 +1,11 @@
+import os.path
+import pathvalidate
+
+
 import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
+import re
 
 
 def main():
@@ -21,10 +26,34 @@ def main():
 
     file_dir = Path.cwd().joinpath('Books')
     file_dir.mkdir(parents=True, exist_ok=True)
+    book_file_basis_url = 'https://tululu.org/txt.php?id='
 
     for book_id in range(1, 11):
         print(f'book_id = {book_id}')
-        save_book(book_id, file_dir)
+        txt_book_url = f'{book_file_basis_url}{book_id}'
+        # save_book(book_id, file_dir)
+        download_txt(txt_book_url, f'{book_id}')
+
+
+def delete_specchar(string):
+    return re.sub(r'[\\|/!@#$"]', '', string)
+
+
+def download_txt(txt_book_url, filename, folder='books/|\\'):
+    # folder = delete_specchar(folder)
+    # filename = delete_specchar(filename)
+    folder = pathvalidate.sanitize_filepath(folder)
+    filename = pathvalidate.sanitize_filename(filename)
+    filepath = os.path.join(folder, f'{filename}.txt')
+
+    print(filepath)
+
+    txt_book = requests.get(txt_book_url)
+    txt_book.raise_for_status()
+    if 'Content-Disposition' in txt_book.headers:
+        with open(filepath, 'wb') as file:
+            file.write(txt_book.content)
+    return filepath
 
 
 def check_for_redirect(book_page):
