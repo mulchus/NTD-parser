@@ -1,9 +1,11 @@
 import os.path
 import pathvalidate
-from urllib import parse
-
-
 import requests
+import argparse
+import sys
+
+
+from urllib import parse
 from pathlib import Path
 from bs4 import BeautifulSoup
 
@@ -13,12 +15,35 @@ IMAGE_DIR = 'Images'
 
 
 def main():
+    award_parser = argparse.ArgumentParser(description='Скрипт скачивания книг с сайта https://tululu.org/')
+    award_parser.add_argument(
+        'start_id',
+        nargs='?',
+        default=1,
+        help='начальный номер книги'
+    )
+    award_parser.add_argument(
+        'end_id',
+        nargs='?',
+        default=2,
+        help='конечный номер книги'
+    )
+
+    start_id = int(award_parser.parse_args().start_id)
+    end_id = int(award_parser.parse_args().end_id)
+    if start_id < 0 or end_id < 0:
+        sys.exit('Неверно введены ID книг')
+    if start_id > end_id:
+        start_id, end_id = end_id, start_id
+
+    print(f'Ищем книги с ID от {start_id} по {end_id}')
+
     Path.cwd().joinpath(FILE_DIR).mkdir(parents=True, exist_ok=True)
     Path.cwd().joinpath(IMAGE_DIR).mkdir(parents=True, exist_ok=True)
 
     book_file_basis_url = 'https://tululu.org/txt.php?id='
 
-    for book_id in range(0, 11):
+    for book_id in range(start_id, end_id+1):
         print('\n', f'book_id = {book_id}')
         txt_book_url = f'{book_file_basis_url}{book_id}'
         txt_book = requests.get(txt_book_url)
