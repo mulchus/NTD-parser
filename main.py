@@ -33,7 +33,7 @@ def main():
 
     book_file_basis_url = 'https://tululu.org/txt.php?id='
 
-    for book_id in range(1, 11):
+    for book_id in range(5, 11):
         print('\n', f'book_id = {book_id}')
         txt_book_url = f'{book_file_basis_url}{book_id}'
         txt_book = requests.get(txt_book_url)
@@ -53,13 +53,14 @@ def main():
             # page_title = page_content.find('head').find('title')
             # print(page_title.text)
 
-            book_name = page_content.find('body').find('div', id="content").find('h1').text.split('::')[0].rstrip()
-            # print(book_name)
+            book_name = page_content.find('div', id="content").find('h1').text.split('::')[0].rstrip()
+            print(book_name)
 
             if page_content.find('span', class_='d_book'):
                 book_genres = page_content.find('span', class_='d_book').find('b').find_next_siblings('a')
-                for genre in book_genres:
-                    print(genre.text)
+                # print(book_genres)
+                book_genres = [genre.text for genre in book_genres]
+                print(book_genres)
 
             # book_author = page_content.find('body').find('div', id="content").find('h1').find('a')
             # print(book_author.text)
