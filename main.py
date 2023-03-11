@@ -1,10 +1,15 @@
 import os.path
 import pathvalidate
+from urllib import parse
 
 
 import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
+
+
+FILE_DIR = 'Books'
+IMAGE_DIR = 'Images'
 
 
 def main():
@@ -23,12 +28,13 @@ def main():
     # filename = Path(image_url).name
     # save_image(image, filename)
 
-    file_dir = Path.cwd().joinpath('Books')
-    file_dir.mkdir(parents=True, exist_ok=True)
+    Path.cwd().joinpath(FILE_DIR).mkdir(parents=True, exist_ok=True)
+    Path.cwd().joinpath(IMAGE_DIR).mkdir(parents=True, exist_ok=True)
+
     book_file_basis_url = 'https://tululu.org/txt.php?id='
 
     for book_id in range(1, 11):
-        print(f'book_id = {book_id}')
+        print('\n', f'book_id = {book_id}')
         txt_book_url = f'{book_file_basis_url}{book_id}'
         txt_book = requests.get(txt_book_url)
         txt_book.raise_for_status()
@@ -37,6 +43,8 @@ def main():
         book_page = requests.get(book_page_url)
         if check_for_redirect(book_page):
             print('Книга не найдена')
+            # print()
+            continue
 
         if 'Content-Disposition' in txt_book.headers:
             page_content = BeautifulSoup(book_page.text, 'lxml')
@@ -46,27 +54,50 @@ def main():
             # print(page_title.text)
 
             book_name = page_content.find('body').find('div', id="content").find('h1').text.split('::')[0].rstrip()
-            print(book_name)
+            # print(book_name)
 
-            book_author = page_content.find('body').find('div', id="content").find('h1').find('a')
-            print(book_author.text)
+            # book_author = page_content.find('body').find('div', id="content").find('h1').find('a')
+            # print(book_author.text)
 
             img_url = f"https://tululu.org{page_content.find('div', class_='bookimage').find('img')['src']}"
-            print(img_url)
+            # print(img_url)
+            download_image(img_url, book_name, IMAGE_DIR)
 
-            book_description = page_content.find_all('table', class_='d_book')[1].find('td')
-            print(book_description.text)
+            # book_description = page_content.find_all('table', class_='d_book')[1].find('td')
+            # if book_description.text:
+            #     print(book_description.text)
 
-            filepath = download_txt(txt_book, book_name)
-            print(filepath)
+            # filepath = download_txt(txt_book, f'{book_id}. {book_name}', FILE_DIR)
+            # print(filepath)
+
+        else:
+            print('Нет файлов книги')
 
 
-def download_txt(txt_book, filename, folder='books/|\\'):
-    folder = pathvalidate.sanitize_filepath(folder)
-    filename = pathvalidate.sanitize_filename(filename)
+def folder_filename_validate(folder='', filename=''):
+    if folder:
+        folder = pathvalidate.sanitize_filepath(folder)
+    if filename:
+        filename = pathvalidate.sanitize_filename(filename)
+    return folder, filename
+
+
+def download_txt(txt_book, filename, folder='Books'):
+    folder, filename = folder_filename_validate(folder, filename)
     filepath = os.path.join(folder, f'{filename}.txt')
     with open(filepath, 'wb') as file:
         file.write(txt_book.content)
+    return filepath
+
+
+def download_image(img_url, filename, folder='Images'):
+    folder, filename = folder_filename_validate(folder, filename)
+    # _, file_ext = os.path.splitext(img_url)
+    _, filename = os.path.split(parse.urlsplit(parse.unquote(img_url)).path)
+    filepath = os.path.join(folder, filename)
+    image = requests.get(img_url)
+    with open(filepath, 'wb') as file:
+        file.write(image.content)
     return filepath
 
 
