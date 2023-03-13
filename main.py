@@ -100,7 +100,7 @@ def parse_book_page(page_content):
 
     book_description = page_content.find_all('table', class_='d_book')[1].find('td').text
 
-    book_information = {
+    about_book = {
         'book_name': book_name,
         'book_author': book_author,
         'book_genres': book_genres,
@@ -109,7 +109,7 @@ def parse_book_page(page_content):
         'comments': comments
     }
 
-    return book_information
+    return about_book
 
 
 def folder_filename_validate(folder='', filename=''):
