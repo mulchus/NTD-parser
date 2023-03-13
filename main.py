@@ -51,6 +51,7 @@ def main():
         while True:
             try:
                 book_page = requests.get(book_page_url)
+                book_page.raise_for_status()
                 check_for_redirect(book_page)
             except requests.exceptions.HTTPError as error:
                 if error.errno:
@@ -136,7 +137,6 @@ def download_image(img_url, filename, folder='Images'):
 
 
 def check_for_redirect(book_page):
-    book_page.raise_for_status()
     if book_page.url == 'https://tululu.org/':
         raise requests.HTTPError('Err:01 - Нет книги на этой странице', book_page.request)
 
