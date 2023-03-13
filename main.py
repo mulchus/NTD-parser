@@ -64,19 +64,21 @@ def main():
                 time.sleep(1)
             else:
                 payload = {'id': book_id}
-                txt_book = requests.get(book_file_basis_url, params=payload)
-                txt_book.raise_for_status()
-
                 try:
-                    _ = txt_book.headers['Content-Disposition']
+                    txt_book = requests.get(book_file_basis_url, params=payload)
+                    txt_book.raise_for_status()
+                    check_for_redirect(txt_book)
+                except requests.exceptions.HTTPError as error:
+                    if error.errno:
+                        print('Нет файлов книги.')
+                        break
+                else:
                     page_content = BeautifulSoup(book_page.text, 'lxml')
                     book_information = parse_book_page(page_content)
                     download_image(book_information['book_img_url'], book_information['book_name'], IMAGE_DIR)
                     filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
                     print(f'Скачана книга: {filepath}')
-                except KeyError:
-                    print('Нет файлов книги')
-                break
+                    break
 
 
 def parse_book_page(page_content):
