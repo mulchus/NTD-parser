@@ -3,6 +3,7 @@ import pathvalidate
 import requests
 import argparse
 import sys
+import time
 
 
 from urllib import parse
@@ -46,25 +47,34 @@ def main():
 
     for book_id in range(start_book_id, end_book_id+1):
         print('\n', f'book_id = {book_id}')
-        txt_book_url = f'{book_file_basis_url}{book_id}'
-        txt_book = requests.get(txt_book_url)
-        txt_book.raise_for_status()
-
         book_page_url = f'https://tululu.org/b{book_id}'
-        book_page = requests.get(book_page_url)
+        while True:
+            try:
+                book_page = requests.get(book_page_url)
+                check_for_redirect(book_page)
+            except requests.exceptions.HTTPError as error:
+                if error.errno:
+                    print(error.errno)
+                else:
+                    print(f'Неверная ссылка на страницу с книгой.\nОшибка {error}')
+                break
+            except requests.exceptions.ConnectionError as error:
+                print(f'Ошибка сети.\nОшибка {error}')
+                time.sleep(1)
+            else:
+                txt_book_url = f'{book_file_basis_url}{book_id}'
+                txt_book = requests.get(txt_book_url)
+                txt_book.raise_for_status()
 
-        if check_for_redirect(book_page):
-            print('Книга не найдена')
-            continue
-
-        if 'Content-Disposition' in txt_book.headers:
-            page_content = BeautifulSoup(book_page.text, 'lxml')
-            book_information = parse_book_page(page_content)
-            download_image(book_information['book_img_url'], book_information['book_name'], IMAGE_DIR)
-            filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
-            print(f'Скачана книга: {filepath}')
-        else:
-            print('Нет файлов книги')
+                if 'Content-Disposition' in txt_book.headers:
+                    page_content = BeautifulSoup(book_page.text, 'lxml')
+                    book_information = parse_book_page(page_content)
+                    download_image(book_information['book_img_url'], book_information['book_name'], IMAGE_DIR)
+                    filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
+                    print(f'Скачана книга: {filepath}')
+                else:
+                    print('Нет файлов книги')
+                break
 
 
 def parse_book_page(page_content):
@@ -127,7 +137,7 @@ def download_image(img_url, filename, folder='Images'):
 def check_for_redirect(book_page):
     book_page.raise_for_status()
     if book_page.url == 'https://tululu.org/':
-        return requests.HTTPError('Error page', book_page.request)
+        raise requests.HTTPError('Err:01 - Нет книги на этой странице', book_page.request)
 
 
 if __name__ == '__main__':
