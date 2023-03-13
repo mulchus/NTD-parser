@@ -125,10 +125,17 @@ def download_image(img_url, folder='Images'):
     folder = pathvalidate.sanitize_filepath(folder)
     _, filename = os.path.split(parse.urlsplit(parse.unquote(img_url)).path)
     filepath = os.path.join(folder, filename)
-    image = requests.get(img_url)
-    with open(filepath, 'wb') as file:
-        file.write(image.content)
-    return filepath
+    try:
+        image = requests.get(img_url)
+        image.raise_for_status()
+        check_for_redirect(image)
+    except requests.exceptions.HTTPError as error:
+        if error.errno:
+            print('Нет картинки.')
+    else:
+        with open(filepath, 'wb') as file:
+            file.write(image.content)
+            return filepath
 
 
 def check_for_redirect(book_page):
