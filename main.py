@@ -75,7 +75,7 @@ def main():
                 else:
                     page_content = BeautifulSoup(book_page.text, 'lxml')
                     book_information = parse_book_page(page_content)
-                    download_image(book_information['book_img_url'], book_information['book_name'], IMAGE_DIR)
+                    download_image(book_information['book_img_url'], IMAGE_DIR)
                     filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
                     print(f'Скачана книга: {filepath}')
                     break
@@ -89,14 +89,14 @@ def parse_book_page(page_content):
     book_genres = []
     if page_content.find('span', class_='d_book'):
         book_genres = [genre.text for genre in page_content.find('span', class_='d_book').find('b')
-        .find_next_siblings('a')]
+                       .find_next_siblings('a')]
 
     book_img_url = f"https://tululu.org{page_content.find('div', class_='bookimage').find('img')['src']}"
 
     comments = []
     if page_content.find('div', class_='texts'):
         comments = [comment.text for comment in page_content.find('div', class_='texts')
-        .find_all_next('span', class_='black')]
+                    .find_all_next('span', class_='black')]
 
     book_description = page_content.find_all('table', class_='d_book')[1].find('td').text
 
@@ -112,24 +112,17 @@ def parse_book_page(page_content):
     return about_book
 
 
-def folder_filename_validate(folder='', filename=''):
-    if folder:
-        folder = pathvalidate.sanitize_filepath(folder)
-    if filename:
-        filename = pathvalidate.sanitize_filename(filename)
-    return folder, filename
-
-
 def download_txt(txt_book, filename, folder='Books'):
-    folder, filename = folder_filename_validate(folder, filename)
+    folder = pathvalidate.sanitize_filepath(folder)
+    filename = pathvalidate.sanitize_filename(filename)
     filepath = os.path.join(folder, f'{filename}.txt')
     with open(filepath, 'wb') as file:
         file.write(txt_book.content)
     return filepath
 
 
-def download_image(img_url, filename, folder='Images'):
-    folder, filename = folder_filename_validate(folder, filename)
+def download_image(img_url, folder='Images'):
+    folder = pathvalidate.sanitize_filepath(folder)
     _, filename = os.path.split(parse.urlsplit(parse.unquote(img_url)).path)
     filepath = os.path.join(folder, filename)
     image = requests.get(img_url)
