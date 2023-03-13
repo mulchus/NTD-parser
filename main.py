@@ -91,7 +91,7 @@ def parse_book_page(page_content):
         book_genres = [genre.text for genre in page_content.find('span', class_='d_book').find('b')
                        .find_next_siblings('a')]
 
-    book_img_url = f"https://tululu.org{page_content.find('div', class_='bookimage').find('img')['src']}"
+    book_img_url = parse.urljoin('https://tululu.org/', page_content.find('div', class_='bookimage').find('img')['src'])
 
     comments = []
     if page_content.find('div', class_='texts'):
