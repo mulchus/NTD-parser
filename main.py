@@ -43,7 +43,7 @@ def main():
     Path.cwd().joinpath(FILE_DIR).mkdir(parents=True, exist_ok=True)
     Path.cwd().joinpath(IMAGE_DIR).mkdir(parents=True, exist_ok=True)
 
-    book_file_basis_url = 'https://tululu.org/txt.php?id='
+    book_file_basis_url = 'https://tululu.org/txt.php'
 
     for book_id in range(start_book_id, end_book_id+1):
         print('\n', f'book_id = {book_id}')
@@ -62,8 +62,8 @@ def main():
                 print(f'Ошибка сети.\nОшибка {error}')
                 time.sleep(1)
             else:
-                txt_book_url = f'{book_file_basis_url}{book_id}'
-                txt_book = requests.get(txt_book_url)
+                payload = {'id': book_id}
+                txt_book = requests.get(book_file_basis_url, params=payload)
                 txt_book.raise_for_status()
 
                 if 'Content-Disposition' in txt_book.headers:
