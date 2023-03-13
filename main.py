@@ -66,13 +66,14 @@ def main():
                 txt_book = requests.get(book_file_basis_url, params=payload)
                 txt_book.raise_for_status()
 
-                if 'Content-Disposition' in txt_book.headers:
+                try:
+                    _ = txt_book.headers['Content-Disposition']
                     page_content = BeautifulSoup(book_page.text, 'lxml')
                     book_information = parse_book_page(page_content)
                     download_image(book_information['book_img_url'], book_information['book_name'], IMAGE_DIR)
                     filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
                     print(f'Скачана книга: {filepath}')
-                else:
+                except KeyError:
                     print('Нет файлов книги')
                 break
 
