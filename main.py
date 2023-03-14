@@ -76,14 +76,17 @@ def main():
                         break
                 else:
                     page_content = BeautifulSoup(book_page.text, 'lxml')
-                    book_information = parse_book_page(page_content)
+                    book_information = parse_book_page(page_content, book_page_url)
                     download_image(book_information['book_img_url'], IMAGE_DIR)
                     filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
                     print(f'Скачана книга: {filepath}')
                     break
 
 
-def parse_book_page(page_content):
+def parse_book_page(page_content, book_page_url):
+    splitresult = parse.urlsplit(book_page_url)
+    site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
+
     book_name = page_content.find('div', id="content").find('h1').text.split('::')[0].rstrip()
 
     book_author = page_content.find('body').find('div', id="content").find('h1').find('a').text
@@ -93,7 +96,7 @@ def parse_book_page(page_content):
         book_genres = [genre.text for genre in page_content.find('span', class_='d_book').find('b')
                        .find_next_siblings('a')]
 
-    book_img_url = parse.urljoin('https://tululu.org/', page_content.find('div', class_='bookimage').find('img')['src'])
+    book_img_url = parse.urljoin(site_url, page_content.find('div', class_='bookimage').find('img')['src'])
 
     comments = []
     if page_content.find('div', class_='texts'):
