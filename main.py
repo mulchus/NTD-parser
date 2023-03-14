@@ -77,7 +77,12 @@ def main():
                 else:
                     page_content = BeautifulSoup(book_page.text, 'lxml')
                     book_information = parse_book_page(page_content, book_page_url)
-                    download_image(book_information['book_img_url'], IMAGE_DIR)
+                    try:
+                        download_image(book_information['book_img_url'], IMAGE_DIR)
+                    except requests.exceptions.HTTPError as error:
+                        if error.errno:
+                            print('Нет картинки.')
+
                     filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
                     print(f'Скачана книга: {filepath}')
                     break
@@ -130,17 +135,12 @@ def download_image(img_url, folder='Images'):
     folder = pathvalidate.sanitize_filepath(folder)
     _, filename = os.path.split(parse.urlsplit(parse.unquote(img_url)).path)
     filepath = os.path.join(folder, filename)
-    try:
-        image = requests.get(img_url)
-        image.raise_for_status()
-        check_for_redirect(image)
-    except requests.exceptions.HTTPError as error:
-        if error.errno:
-            print('Нет картинки.')
-    else:
-        with open(filepath, 'wb') as file:
-            file.write(image.content)
-            return filepath
+    image = requests.get(img_url)
+    image.raise_for_status()
+    check_for_redirect(image)
+    with open(filepath, 'wb') as file:
+        file.write(image.content)
+        return filepath
 
 
 def check_for_redirect(book_page):
