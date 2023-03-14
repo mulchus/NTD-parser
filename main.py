@@ -20,19 +20,21 @@ def main():
     book_parser.add_argument(
         'start_book_id',
         nargs='?',
+        type=int,
         default=1,
         help='начальный номер книги'
     )
     book_parser.add_argument(
         'end_book_id',
         nargs='?',
+        type=int,
         default=2,
         help='конечный номер книги'
     )
 
     book_parser_args = book_parser.parse_args()
-    start_book_id = int(book_parser_args.start_book_id)
-    end_book_id = int(book_parser_args.end_book_id)
+    start_book_id = book_parser_args.start_book_id
+    end_book_id = book_parser_args.end_book_id
     if start_book_id < 0 or end_book_id < 0:
         sys.exit('Неверно введены ID книг')
     if start_book_id > end_book_id:
