@@ -81,6 +81,7 @@ def main():
 
             page_content = BeautifulSoup(book_page.text, 'lxml')
             book_information = parse_book_page(page_content, book_page_url)
+
             try:
                 download_image(book_information['book_img_url'], IMAGE_DIR)
             except requests.exceptions.HTTPError as error:
@@ -91,7 +92,7 @@ def main():
                 time.sleep(1)
                 continue
 
-            filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
+            filepath = save_txt_file(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
             print(f'Скачана книга: {filepath}')
             break
 
@@ -130,7 +131,7 @@ def parse_book_page(page_content, book_page_url):
     return about_book
 
 
-def download_txt(txt_book, filename, folder='Books'):
+def save_txt_file(txt_book, filename, folder='Books'):
     folder = pathvalidate.sanitize_filepath(folder)
     filename = pathvalidate.sanitize_filename(filename)
     filepath = os.path.join(folder, f'{filename}.txt')
