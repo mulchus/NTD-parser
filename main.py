@@ -56,13 +56,14 @@ def main():
                 book_page.raise_for_status()
                 check_for_redirect(book_page)
             except requests.exceptions.HTTPError as error:
-                if error.errno:
-                    print(error.errno)
-                print(f'Неверная ссылка на страницу с книгой.\nОшибка {error}')
+                if not error.errno:
+                    print(f'Неверная ссылка на страницу с книгой.\nОшибка {error}')
+                print(error.errno)
                 break
             except requests.exceptions.ConnectionError as error:
                 print(f'Ошибка сети.\nОшибка {error}')
                 time.sleep(1)
+                continue
 
             payload = {'id': book_id}
             try:
@@ -73,6 +74,10 @@ def main():
                 if error.errno:
                     print('Нет файлов книги.')
                     break
+            except requests.exceptions.ConnectionError as error:
+                print(f'Ошибка сети.\nОшибка {error}')
+                time.sleep(1)
+                continue
 
             page_content = BeautifulSoup(book_page.text, 'lxml')
             book_information = parse_book_page(page_content, book_page_url)
@@ -81,6 +86,10 @@ def main():
             except requests.exceptions.HTTPError as error:
                 if error.errno:
                     print('Нет картинки.')
+            except requests.exceptions.ConnectionError as error:
+                print(f'Ошибка сети.\nОшибка {error}')
+                time.sleep(1)
+                continue
 
             filepath = download_txt(txt_book, f'{book_id}. {book_information["book_name"]}', FILE_DIR)
             print(f'Скачана книга: {filepath}')
