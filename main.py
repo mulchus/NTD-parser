@@ -57,6 +57,8 @@ def main():
         Path.cwd().joinpath(parser_args.dest_folder, FILE_DIR).mkdir(parents=True, exist_ok=True)
     if not parser_args.skip_imgs:
         Path.cwd().joinpath(parser_args.dest_folder, IMAGE_DIR).mkdir(parents=True, exist_ok=True)
+    if parser_args.skip_txt and parser_args.skip_imgs:
+        parser_args.dest_folder.mkdir(parents=True, exist_ok=True)
 
     page_of_category_url = PAGE_OF_CATEGORY_URL
     books_urls = parse_tululu_category.get_books_urls(page_of_category_url, parser_args)
@@ -71,10 +73,8 @@ def main():
     if not parser_args.skip_txt:
         print(f'Скачано книг: ', {len(books_informations)})
 
-    if not parser_args.json_path:
-        parser_args.json_path = parser_args.dest_folder
-    else:
-        parser_args.json_path.mkdir(parents=True, exist_ok=True)
+    parser_args.json_path = parser_args.dest_folder if not parser_args.json_path \
+        else parser_args.json_path.mkdir(parents=True, exist_ok=True)
 
     with open(Path.joinpath(parser_args.json_path, 'books_informations.json'), 'w', encoding='utf-8') as json_file:
         json.dump(books_informations, json_file, ensure_ascii=False, indent=4)
