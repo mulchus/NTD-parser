@@ -15,30 +15,29 @@ IMAGE_DIR = 'Images'
 def main():
     parser = argparse.ArgumentParser(description='Скрипт скачивания книг с сайта https://tululu.org/')
     parser.add_argument(
-        'start_id',
+        '--start_page',
         nargs='?',
         type=int,
         default=1,
         help='начальный номер книги'
     )
     parser.add_argument(
-        'end_id',
+        '--end_page',
         nargs='?',
         type=int,
-        default=2,
+        default=0,
         help='конечный номер книги'
     )
 
     parser_args = parser.parse_args()
-    start_page_id = parser_args.start_id
-    end_page_id = parser_args.end_id
+    start_page = parser_args.start_page
+    end_page = parser_args.end_page
 
     Path.cwd().joinpath(FILE_DIR).mkdir(parents=True, exist_ok=True)
     Path.cwd().joinpath(IMAGE_DIR).mkdir(parents=True, exist_ok=True)
 
     page_of_category_url = 'https://tululu.org/l55/'
-    pages_number = 1
-    books_urls = parse_tululu_category.get_books_urls(page_of_category_url, pages_number)
+    books_urls = parse_tululu_category.get_books_urls(page_of_category_url, start_page, end_page)
     print(books_urls)
     print(len(books_urls))
 
