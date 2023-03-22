@@ -34,7 +34,6 @@ def get_book(book_page_url, parser_args):
                 filepath = functions.save_txt_file(txt_book, f'{book_id}.{book_information["title"]}',
                                                    Path.joinpath(parser_args.dest_folder, main.FILE_DIR))
                 book_information['book_path'] = filepath.replace('\\', '/')
-                # pathvalidate.sanitize_filepath(filepath, platform='auto')
             except requests.exceptions.HTTPError:
                 print(f'Нет файлов книги.')
                 break
@@ -48,7 +47,6 @@ def get_book(book_page_url, parser_args):
                 imgpath = functions.download_image(book_information['img_scr'],
                                                    Path.joinpath(parser_args.dest_folder, main.IMAGE_DIR))
                 book_information['img_scr'] = imgpath.replace('\\', '/')
-                # pathvalidate.sanitize_filepath(imgpath, platform='auto')
 
             except requests.exceptions.HTTPError as error:
                 if error.errno:
@@ -77,8 +75,6 @@ def parse_book_page(page_content, book_page_url):
     book_comments = []
     if page_content.select_one('div.texts'):
         book_comments = [comment.text for comment in page_content.select('div.texts span.black')]
-
-    # book_description = page_content.find_all('table', class_='d_book')[1].find('td').text  #по ТЗ пока не используется
 
     book_information = {
         'title': book_title,
