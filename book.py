@@ -4,7 +4,6 @@ import time
 import main
 
 
-from pathlib import Path
 from bs4 import BeautifulSoup
 from urllib import parse
 
@@ -38,7 +37,7 @@ def get_book(book_page_url):
             time.sleep(1)
             continue
 
-        book_information = parse_book_page(page_content, book_page_url, book_id)
+        book_information = parse_book_page(page_content, book_page_url)
 
         try:
             imgpath = functions.download_image(book_information['img_scr'], main.IMAGE_DIR)
@@ -53,13 +52,13 @@ def get_book(book_page_url):
 
         if txt_book:
             filepath = functions.save_txt_file(txt_book, f'{book_id}.{book_information["title"]}',
-                                                main.FILE_DIR)
+                                               main.FILE_DIR)
             book_information['book_path'] = filepath.replace('\\', '/')
         break
     return filepath, book_information
 
 
-def parse_book_page(page_content, book_page_url, book_id):
+def parse_book_page(page_content, book_page_url):
     splitresult = parse.urlsplit(book_page_url)
     site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
 
@@ -77,7 +76,7 @@ def parse_book_page(page_content, book_page_url, book_id):
     book_comments = []
     if page_content.find('div', class_='texts'):
         book_comments = [comment.text for comment in page_content.find('div', class_='texts')
-                    .find_all_next('span', class_='black')]
+                         .find_all_next('span', class_='black')]
 
     # book_description = page_content.find_all('table', class_='d_book')[1].find('td').text  #по ТЗ пока не используется
 
