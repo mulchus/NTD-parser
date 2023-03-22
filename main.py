@@ -73,8 +73,10 @@ def main():
     if not parser_args.skip_txt:
         print(f'Скачано книг: ', {len(books_informations)})
 
-    parser_args.json_path = parser_args.dest_folder if not parser_args.json_path \
-        else parser_args.json_path.mkdir(parents=True, exist_ok=True)
+    if not parser_args.json_path:
+        parser_args.json_path = parser_args.dest_folder
+    else:
+        Path.joinpath(parser_args.json_path).mkdir(parents=True, exist_ok=True)
 
     with open(Path.joinpath(parser_args.json_path, 'books_informations.json'), 'w', encoding='utf-8') as json_file:
         json.dump(books_informations, json_file, ensure_ascii=False, indent=4)
