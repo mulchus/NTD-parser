@@ -2,6 +2,8 @@ import argparse
 import sys
 import book
 import parse_tululu_category
+import json
+
 
 from pathlib import Path
 
@@ -28,16 +30,17 @@ def main():
     )
 
     parser_args = parser.parse_args()
+    start_page_id = parser_args.start_id
+    end_page_id = parser_args.end_id
 
     Path.cwd().joinpath(FILE_DIR).mkdir(parents=True, exist_ok=True)
     Path.cwd().joinpath(IMAGE_DIR).mkdir(parents=True, exist_ok=True)
 
-    start_page_id = parser_args.start_id
-    end_page_id = parser_args.end_id
-
     page_of_category_url = 'https://tululu.org/l55/'
-    parse_tululu_category.find_books_urls(page_of_category_url)
-
+    pages_number = 1
+    books_urls = parse_tululu_category.get_books_urls(page_of_category_url, pages_number)
+    print(books_urls)
+    print(len(books_urls))
 
     # скачка книг с... по...
     # start_book_id = parser_args.start_book_id
@@ -48,11 +51,18 @@ def main():
     #     start_book_id, end_book_id = end_book_id, start_book_id
     # print(f'Ищем книги с ID от {start_book_id} по {end_book_id}')
 
-    # for book_id in range(start_book_id, end_book_id+1):
-    #     print('\n', f'book_id = {book_id}')
-    #     filepath = book.get_book(book_id)
-    #     if filepath:
-    #         print(f'Скачана книга: {filepath}')
+    books_informations = []
+    for book_num, book_page_url in enumerate(books_urls):
+        print(f'Скачиваем по ссылке № {book_num+1}')
+        filepath, book_information = book.get_book(book_page_url)
+        if filepath:
+            print(f'Скачана книга: {filepath}')
+            books_informations.append(book_information)
+
+    print(f'Скачано книг: ', {len(books_informations)})
+
+    with open(Path.cwd().joinpath('books_informations.json'), 'w', encoding='utf-8') as json_file:
+        json.dump(books_informations, json_file, ensure_ascii=False, indent=4)
 
 
 if __name__ == '__main__':

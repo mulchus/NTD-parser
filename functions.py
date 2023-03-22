@@ -35,7 +35,7 @@ def download_image(img_url, folder='Images'):
         return filepath
 
 
-def save_txt_file(txt_book, filename, folder='Books'):
+def save_txt_file(txt_book, filename, folder):
     folder = pathvalidate.sanitize_filepath(folder)
     filename = pathvalidate.sanitize_filename(filename)
     filepath = os.path.join(folder, f'{filename}.txt')

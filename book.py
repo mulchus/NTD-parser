@@ -4,14 +4,16 @@ import time
 import main
 
 
+from pathlib import Path
 from bs4 import BeautifulSoup
 from urllib import parse
 
 
-def get_book(book_id):
-    book_page_url = f'https://tululu.org/b{book_id}'
+def get_book(book_page_url):
+    book_id = parse.urlsplit(book_page_url).path.replace('/', '').replace('b', '')
     book_file_basis_url = 'https://tululu.org/txt.php'
     filepath = ''
+    book_information = ''
     while True:
         try:
             book_page = functions.get_page(book_page_url)
@@ -36,10 +38,11 @@ def get_book(book_id):
             time.sleep(1)
             continue
 
-        book_information = parse_book_page(page_content, book_page_url)
+        book_information = parse_book_page(page_content, book_page_url, book_id)
 
         try:
-            functions.download_image(book_information['book_img_url'], main.IMAGE_DIR)
+            imgpath = functions.download_image(book_information['img_scr'], main.IMAGE_DIR)
+            book_information['img_scr'] = imgpath.replace('\\', '/')
         except requests.exceptions.HTTPError as error:
             if error.errno:
                 print('Нет картинки.')
@@ -49,16 +52,18 @@ def get_book(book_id):
             continue
 
         if txt_book:
-            filepath = functions.save_txt_file(txt_book, f'{book_id}. {book_information["book_name"]}', main.FILE_DIR)
+            filepath = functions.save_txt_file(txt_book, f'{book_id}.{book_information["title"]}',
+                                                main.FILE_DIR)
+            book_information['book_path'] = filepath.replace('\\', '/')
         break
-    return filepath
+    return filepath, book_information
 
 
-def parse_book_page(page_content, book_page_url):
+def parse_book_page(page_content, book_page_url, book_id):
     splitresult = parse.urlsplit(book_page_url)
     site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
 
-    book_name = page_content.find('div', id="content").find('h1').text.split('::')[0].rstrip()
+    book_title = page_content.find('div', id="content").find('h1').text.split('::')[0].rstrip()
 
     book_author = page_content.find('body').find('div', id="content").find('h1').find('a').text
 
@@ -69,19 +74,19 @@ def parse_book_page(page_content, book_page_url):
 
     book_img_url = parse.urljoin(site_url, page_content.find('div', class_='bookimage').find('img')['src'])
 
-    comments = []
+    book_comments = []
     if page_content.find('div', class_='texts'):
-        comments = [comment.text for comment in page_content.find('div', class_='texts')
+        book_comments = [comment.text for comment in page_content.find('div', class_='texts')
                     .find_all_next('span', class_='black')]
 
-    book_description = page_content.find_all('table', class_='d_book')[1].find('td').text
+    # book_description = page_content.find_all('table', class_='d_book')[1].find('td').text  #по ТЗ пока не используется
 
-    about_book = {
-        'book_name': book_name,
-        'book_author': book_author,
-        'book_genres': book_genres,
-        'book_img_url': book_img_url,
-        'book_description': book_description,
-        'comments': comments
+    book_information = {
+        'title': book_title,
+        'author': book_author,
+        'img_scr': book_img_url,
+        'book_path': '',
+        'comments': book_comments,
+        'genres': book_genres,
     }
-    return about_book
+    return book_information

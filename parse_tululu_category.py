@@ -7,13 +7,15 @@ from bs4 import BeautifulSoup
 from urllib import parse
 
 
-def find_books_urls(page_of_category_url):
+def get_books_urls(page_of_category_url, pages_number):
+    books_urls = []
     splitresult = parse.urlsplit(page_of_category_url)
     site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
     last_page = (BeautifulSoup(functions.get_page(page_of_category_url).text, 'lxml')).find_all('a',
                                                                                                 class_='npage')[-1].text
-    for page in range(0, 10):
+    for page in range(1, pages_number+1):
         if page > int(last_page):
+            print('Страницы исчерпаны')
             break
         current_page = parse.urljoin(page_of_category_url, str(page))
         while True:
@@ -29,6 +31,7 @@ def find_books_urls(page_of_category_url):
             category_content = BeautifulSoup(category_page.text, 'lxml')
 
             for table in category_content.find('div', id='content').find_all('table'):
-                book_url_2 = parse.urljoin(site_url, table.find('a')['href'])
-                print(book_url_2)
+                book_url = parse.urljoin(site_url, table.find('a')['href'])
+                books_urls.append(book_url)
             break
+    return books_urls
