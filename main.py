@@ -53,6 +53,8 @@ def main():
 
     books_informations = []
     for book_num, book_page_url in enumerate(books_urls):
+        if book_num+1 > 100:
+            break
         print(f'Скачиваем по ссылке № {book_num+1}')
         filepath, book_information = book.get_book(book_page_url)
         if filepath:
