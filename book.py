@@ -2,7 +2,6 @@ import requests
 import functions
 import time
 import main
-import pathvalidate
 
 from pathlib import Path
 from bs4 import BeautifulSoup
