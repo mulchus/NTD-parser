@@ -2,7 +2,6 @@ import requests
 import os.path
 import pathvalidate
 
-
 from urllib import parse
 
 
@@ -24,7 +23,7 @@ def check_for_redirect(book_page):
 
 
 def download_image(img_url, folder='Images'):
-    folder = pathvalidate.sanitize_filepath(folder)
+    folder = pathvalidate.sanitize_filepath(folder, platform='auto')
     _, filename = os.path.split(parse.urlsplit(parse.unquote(img_url)).path)
     filepath = os.path.join(folder, filename)
     image = requests.get(img_url)
@@ -36,8 +35,8 @@ def download_image(img_url, folder='Images'):
 
 
 def save_txt_file(txt_book, filename, folder):
-    folder = pathvalidate.sanitize_filepath(folder)
-    filename = pathvalidate.sanitize_filename(filename)
+    folder = pathvalidate.sanitize_filepath(folder, platform='auto')
+    filename = pathvalidate.sanitize_filename(filename, platform='auto')
     filepath = os.path.join(folder, f'{filename}.txt')
     with open(filepath, 'wb') as file:
         file.write(txt_book.content)

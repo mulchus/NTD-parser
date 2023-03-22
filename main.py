@@ -1,15 +1,14 @@
 import argparse
-import sys
 import book
 import parse_tululu_category
 import json
-
 
 from pathlib import Path
 
 
 FILE_DIR = 'Books'
 IMAGE_DIR = 'Images'
+PAGE_OF_CATEGORY_URL = 'https://tululu.org/l55/'
 
 
 def main():
@@ -28,41 +27,56 @@ def main():
         default=0,
         help='конечный номер книги'
     )
+    parser.add_argument(
+        '--dest_folder',
+        nargs='?',
+        type=Path,
+        default=Path.cwd(),
+        help='путь к каталогу с результатами парсинга: картинкам, книгам, JSON'
+    )
+    parser.add_argument(
+        '--skip_imgs',
+        action="store_true",
+        help='не скачивать картинки'
+    )
+    parser.add_argument(
+        '--skip_txt',
+        action="store_true",
+        help='не скачивать книги'
+    )
+    parser.add_argument(
+        '--json_path',
+        nargs='?',
+        type=Path,
+        help='указать свой путь к *.json файлу с результатами'
+    )
 
     parser_args = parser.parse_args()
-    start_page = parser_args.start_page
-    end_page = parser_args.end_page
 
-    Path.cwd().joinpath(FILE_DIR).mkdir(parents=True, exist_ok=True)
-    Path.cwd().joinpath(IMAGE_DIR).mkdir(parents=True, exist_ok=True)
+    if not parser_args.skip_txt:
+        Path.cwd().joinpath(parser_args.dest_folder, FILE_DIR).mkdir(parents=True, exist_ok=True)
+    if not parser_args.skip_imgs:
+        Path.cwd().joinpath(parser_args.dest_folder, IMAGE_DIR).mkdir(parents=True, exist_ok=True)
 
-    page_of_category_url = 'https://tululu.org/l55/'
-    books_urls = parse_tululu_category.get_books_urls(page_of_category_url, start_page, end_page)
-    print(books_urls)
-    print(len(books_urls))
-
-    # скачка книг с... по...
-    # start_book_id = parser_args.start_book_id
-    # end_book_id = parser_args.end_book_id
-    # if start_book_id < 0 or end_book_id < 0:
-    #     sys.exit('Неверно введены ID книг')
-    # if start_book_id > end_book_id:
-    #     start_book_id, end_book_id = end_book_id, start_book_id
-    # print(f'Ищем книги с ID от {start_book_id} по {end_book_id}')
+    page_of_category_url = PAGE_OF_CATEGORY_URL
+    books_urls = parse_tululu_category.get_books_urls(page_of_category_url, parser_args)
 
     books_informations = []
-    for book_num, book_page_url in enumerate(books_urls):
-        if book_num+1 > 100:
-            break
-        print(f'Скачиваем по ссылке № {book_num+1}')
-        filepath, book_information = book.get_book(book_page_url)
+    for book_page_url in books_urls:
+        filepath, book_information = book.get_book(book_page_url, parser_args)
+        books_informations.append(book_information)
         if filepath:
             print(f'Скачана книга: {filepath}')
-            books_informations.append(book_information)
 
-    print(f'Скачано книг: ', {len(books_informations)})
+    if not parser_args.skip_txt:
+        print(f'Скачано книг: ', {len(books_informations)})
 
-    with open(Path.cwd().joinpath('books_informations.json'), 'w', encoding='utf-8') as json_file:
+    if not parser_args.json_path:
+        parser_args.json_path = parser_args.dest_folder
+    else:
+        parser_args.json_path.mkdir(parents=True, exist_ok=True)
+
+    with open(Path.joinpath(parser_args.json_path, 'books_informations.json'), 'w', encoding='utf-8') as json_file:
         json.dump(books_informations, json_file, ensure_ascii=False, indent=4)
 
 
