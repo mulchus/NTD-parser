@@ -61,7 +61,8 @@ def main():
         parser_args.dest_folder.mkdir(parents=True, exist_ok=True)
 
     page_of_category_url = PAGE_OF_CATEGORY_URL
-    books_urls = parse_tululu_category.get_books_urls(page_of_category_url, parser_args)
+    books_urls = parse_tululu_category.get_books_urls(page_of_category_url,
+                                                      parser_args.start_page, parser_args.end_page)
 
     books_informations = []
     for book_page_url in books_urls:

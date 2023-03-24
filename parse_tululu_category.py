@@ -6,15 +6,17 @@ from bs4 import BeautifulSoup
 from urllib import parse
 
 
-def get_books_urls(page_of_category_url, parser_args):
+def get_books_urls(page_of_category_url, start_page, end_page):
     books_urls = []
     splitresult = parse.urlsplit(page_of_category_url)
     site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
-    last_page = (BeautifulSoup(functions.get_page(page_of_category_url).text, 'lxml')).select('a.npage')[-1].text
-    if not parser_args.end_page:
-        parser_args.end_page = int(last_page)
+    page_of_category_url_text = functions.get_page(page_of_category_url).text
+    soup = BeautifulSoup(page_of_category_url_text, 'lxml')
+    last_page = soup.select('a.npage')[-1].text
+    if not end_page:
+        end_page = int(last_page)
 
-    for page in range(parser_args.start_page, parser_args.end_page+1):
+    for page in range(start_page, end_page+1):
         if page > int(last_page):
             print('Страницы исчерпаны')
             break
