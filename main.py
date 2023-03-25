@@ -75,12 +75,12 @@ def main():
             time.sleep(1)
             continue
 
-        books_informations = []
+        about_books = []
         for book_page_url in books_urls:
             while True:
                 try:
-                    filepath, book_information = book.get_book(book_page_url, parser_args)
-                    books_informations.append(book_information)
+                    filepath, about_book = book.get_book(book_page_url, parser_args)
+                    about_books.append(about_book)
                     if filepath:
                         print(f'Скачана книга: {filepath}')
                     break
@@ -97,15 +97,15 @@ def main():
                     break
 
         if not parser_args.skip_txt:
-            print(f'Скачано книг: ', {len(books_informations)})
+            print(f'Скачано книг: ', {len(about_books)})
 
         if not parser_args.json_path:
             parser_args.json_path = parser_args.dest_folder
         else:
             Path.joinpath(parser_args.json_path).mkdir(parents=True, exist_ok=True)
 
-        with open(Path.joinpath(parser_args.json_path, 'books_informations.json'), 'w', encoding='utf-8') as json_file:
-            json.dump(books_informations, json_file, ensure_ascii=False, indent=4)
+        with open(Path.joinpath(parser_args.json_path, 'about_books.json'), 'w', encoding='utf-8') as json_file:
+            json.dump(about_books, json_file, ensure_ascii=False, indent=4)
 
         break
 

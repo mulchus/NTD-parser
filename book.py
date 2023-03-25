@@ -13,21 +13,21 @@ def get_book(book_page_url, parser_args):
     while True:
         book_page = functions.get_page(book_page_url)
         page_content = BeautifulSoup(book_page.text, 'lxml')
-        book_information = parse_book_page(page_content, book_page_url)
+        about_book = parse_book_page(page_content, book_page_url)
 
         if not parser_args.skip_txt:
             txt_book = functions.get_page(book_file_basis_url, {'id': book_id})
-            filepath = functions.save_txt_file(txt_book, f'{book_id}.{book_information["title"]}',
+            filepath = functions.save_txt_file(txt_book, f'{book_id}.{about_book["title"]}',
                                                Path.joinpath(parser_args.dest_folder, main.FILE_DIR))
-            book_information['book_path'] = filepath.replace('\\', '/')
+            about_book['book_path'] = filepath.replace('\\', '/')
 
         if not parser_args.skip_imgs:
-            imgpath = functions.download_image(book_information['img_scr'],
+            imgpath = functions.download_image(about_book['img_scr'],
                                                Path.joinpath(parser_args.dest_folder, main.IMAGE_DIR))
-            book_information['img_scr'] = imgpath.replace('\\', '/')
+            about_book['img_scr'] = imgpath.replace('\\', '/')
 
         break
-    return filepath, book_information
+    return filepath, about_book
 
 
 def parse_book_page(page_content, book_page_url):
@@ -47,7 +47,7 @@ def parse_book_page(page_content, book_page_url):
     if page_content.select_one('div.texts'):
         book_comments = [comment.text for comment in page_content.select('div.texts span.black')]
 
-    book_information = {
+    about_book = {
         'title': book_title,
         'author': book_author,
         'img_scr': book_img_url,
@@ -55,4 +55,4 @@ def parse_book_page(page_content, book_page_url):
         'comments': book_comments,
         'genres': book_genres,
     }
-    return book_information
+    return about_book
