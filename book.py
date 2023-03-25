@@ -1,6 +1,4 @@
-import requests
 import functions
-import time
 import main
 
 from pathlib import Path
@@ -12,49 +10,22 @@ def get_book(book_page_url, parser_args):
     book_id = parse.urlsplit(book_page_url).path.replace('/', '').replace('b', '')
     book_file_basis_url = 'https://tululu.org/txt.php'
     filepath = ''
-    book_information = ''
     while True:
-        try:
-            book_page = functions.get_page(book_page_url)
-        except requests.exceptions.HTTPError as error:
-            if not error.errno:
-                print(f'Неверная ссылка на страницу с книгой.\nОшибка {error}')
-            break
-        except requests.exceptions.ConnectionError as error:
-            print(f'Ошибка сети.\nОшибка {error}')
-            time.sleep(1)
-            continue
-
+        book_page = functions.get_page(book_page_url)
         page_content = BeautifulSoup(book_page.text, 'lxml')
         book_information = parse_book_page(page_content, book_page_url)
 
         if not parser_args.skip_txt:
-            try:
-                txt_book = functions.get_page(book_file_basis_url, {'id': book_id})
-                filepath = functions.save_txt_file(txt_book, f'{book_id}.{book_information["title"]}',
-                                                   Path.joinpath(parser_args.dest_folder, main.FILE_DIR))
-                book_information['book_path'] = filepath.replace('\\', '/')
-            except requests.exceptions.HTTPError:
-                print(f'Нет файлов книги.')
-                break
-            except requests.exceptions.ConnectionError as error:
-                print(f'Ошибка сети.\nОшибка {error}')
-                time.sleep(1)
-                continue
+            txt_book = functions.get_page(book_file_basis_url, {'id': book_id})
+            filepath = functions.save_txt_file(txt_book, f'{book_id}.{book_information["title"]}',
+                                               Path.joinpath(parser_args.dest_folder, main.FILE_DIR))
+            book_information['book_path'] = filepath.replace('\\', '/')
 
         if not parser_args.skip_imgs:
-            try:
-                imgpath = functions.download_image(book_information['img_scr'],
-                                                   Path.joinpath(parser_args.dest_folder, main.IMAGE_DIR))
-                book_information['img_scr'] = imgpath.replace('\\', '/')
+            imgpath = functions.download_image(book_information['img_scr'],
+                                               Path.joinpath(parser_args.dest_folder, main.IMAGE_DIR))
+            book_information['img_scr'] = imgpath.replace('\\', '/')
 
-            except requests.exceptions.HTTPError as error:
-                if error.errno:
-                    print('Нет картинки.')
-            except requests.exceptions.ConnectionError as error:
-                print(f'Ошибка сети.\nОшибка {error}')
-                time.sleep(1)
-                continue
         break
     return filepath, book_information
 

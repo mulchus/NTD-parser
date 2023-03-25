@@ -6,14 +6,9 @@ from urllib import parse
 
 
 def get_page(page_url, payload=''):
-    try:
-        page = requests.get(page_url, params=payload)
-        page.raise_for_status()
-        check_for_redirect(page)
-    except requests.exceptions.HTTPError as error:
-        raise requests.exceptions.HTTPError(error)
-    except requests.exceptions.ConnectionError as error:
-        raise requests.exceptions.ConnectionError(error)
+    page = requests.get(page_url, params=payload)
+    page.raise_for_status()
+    check_for_redirect(page)
     return page
 
 
