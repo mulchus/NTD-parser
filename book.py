@@ -10,23 +10,21 @@ def get_book(book_page_url, parser_args):
     book_id = parse.urlsplit(book_page_url).path.replace('/', '').replace('b', '')
     book_file_basis_url = 'https://tululu.org/txt.php'
     filepath = ''
-    while True:
-        book_page = functions.get_page(book_page_url)
-        page_content = BeautifulSoup(book_page.text, 'lxml')
-        about_book = parse_book_page(page_content, book_page_url)
+    book_page = functions.get_page(book_page_url)
+    page_content = BeautifulSoup(book_page.text, 'lxml')
+    about_book = parse_book_page(page_content, book_page_url)
 
-        if not parser_args.skip_txt:
-            txt_book = functions.get_page(book_file_basis_url, {'id': book_id})
-            filepath = functions.save_txt_file(txt_book, f'{book_id}.{about_book["title"]}',
-                                               Path.joinpath(parser_args.dest_folder, main.FILE_DIR))
-            about_book['book_path'] = filepath.replace('\\', '/')
+    if not parser_args.skip_txt:
+        txt_book = functions.get_page(book_file_basis_url, {'id': book_id})
+        filepath = functions.save_txt_file(txt_book, f'{book_id}.{about_book["title"]}',
+                                           Path.joinpath(parser_args.dest_folder, main.FILE_DIR))
+        about_book['book_path'] = filepath.replace('\\', '/')
 
-        if not parser_args.skip_imgs:
-            imgpath = functions.download_image(about_book['img_scr'],
-                                               Path.joinpath(parser_args.dest_folder, main.IMAGE_DIR))
-            about_book['img_scr'] = imgpath.replace('\\', '/')
+    if not parser_args.skip_imgs:
+        imgpath = functions.download_image(about_book['img_scr'],
+                                           Path.joinpath(parser_args.dest_folder, main.IMAGE_DIR))
+        about_book['img_scr'] = imgpath.replace('\\', '/')
 
-        break
     return filepath, about_book
 
 
