@@ -10,14 +10,10 @@ def get_books_urls(page_of_category_url, start_page, end_page):
     site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
     page_of_category_url_text = functions.get_page(page_of_category_url).text
     soup = BeautifulSoup(page_of_category_url_text, 'lxml')
-    last_page = soup.select('a.npage')[-1].text
+    last_page = int(soup.select('a.npage')[-1].text)
     if not end_page:
-        end_page = int(last_page)
-
-    for page in range(start_page, end_page+1):
-        if page > int(last_page):
-            print('Страницы исчерпаны')
-            break
+        end_page = last_page
+    for page in range(start_page, min(end_page, last_page)+1):
         current_page = parse.urljoin(page_of_category_url, str(page))
         category_page = functions.get_page(current_page)
         category_content = BeautifulSoup(category_page.text, 'lxml')
@@ -25,5 +21,4 @@ def get_books_urls(page_of_category_url, start_page, end_page):
         for table in category_content.select('div#content table'):
             book_url = parse.urljoin(site_url, table.select_one('a')['href'])
             books_urls.append(book_url)
-
     return books_urls
