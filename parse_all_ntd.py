@@ -38,6 +38,8 @@ def get_ntd(url_start_page_of_ntd):
                         'ntd_name': ntd_name,
                     }
                     all_ntd.append(ntd)
+            #         break
+            # break
 
     return all_ntd
 

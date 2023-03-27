@@ -2,6 +2,8 @@ import parse_all_ntd
 import json
 import time
 import requests
+from docxtpl import DocxTemplate, RichText
+
 
 from pathlib import Path
 
@@ -28,15 +30,25 @@ def main():
             continue
         break
 
-    print(f'Найдено стандартов (изменений): ', {len(all_ntd)})
+    ntd_count = len(all_ntd)
+    print(f'Найдено стандартов (изменений): ', {ntd_count})
     with open(Path.joinpath(Path.cwd(), 'all_ntd.json'), 'w', encoding='utf-8') as json_file:
         json.dump(all_ntd, json_file, ensure_ascii=False, indent=4)
 
+    # сохранение НТД в файл в табличном виде по формату в файле
+    doc = DocxTemplate("ntd_tpl.docx")
 
-
-
-
-
+    ntd_rich_text = []
+    for ntd in all_ntd:
+        ntd_rich_text = RichText()
+        ntd_rich_text.add(ntd['ntd_number'],url_id=doc.build_url_id(ntd['ntd_url']))
+        break
+    context = {
+        'example': ntd_rich_text
+    }
+    # print(ntd_rich_text)
+    doc.render(context)
+    doc.save('ntd.docx')
 
 
 if __name__ == '__main__':
