@@ -1,5 +1,5 @@
 import requests
-from main import WORD_ROOT_FILTER
+from main import SEEKING_WORD_ROOTS
 
 from bs4 import BeautifulSoup
 from urllib import parse
@@ -31,8 +31,8 @@ def get_ntd(url_start_page_of_ntd):
                 page_of_izm_ntd_content = BeautifulSoup(page_of_izm_ntd.text, 'lxml')
                 ntd_name = page_of_izm_ntd_content.select('td[colspan="3"]')[-2].select_one('tr.first').select('td')[-1].text
 
-            for root in WORD_ROOT_FILTER:
-                if root in ntd_name.lower():
+            for root in SEEKING_WORD_ROOTS:
+                if root in ntd_name.lower() or root in ntd_number.lower():
 
                     # результат в формате словаря
                     ntd = {
@@ -49,6 +49,7 @@ def get_ntd(url_start_page_of_ntd):
                     all_ntd.append(ntd)
                     all_ntd_for_table['tbl_contents'].append(ntd_for_table)
                     table_col_number += 1
+                    print(f'{ntd_number} - {ntd_name}')
                     break
             # break
 
