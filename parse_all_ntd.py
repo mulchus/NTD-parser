@@ -7,11 +7,13 @@ from urllib import parse
 
 def get_ntd(url_start_page_of_ntd):
     all_ntd = []
+    all_ntd_for_table = {'tbl_contents':[]}
     splitresult = parse.urlsplit(url_start_page_of_ntd)
     site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
     url_start_page_of_ntd_text = get_page(url_start_page_of_ntd, None).text
     soup = BeautifulSoup(url_start_page_of_ntd_text, 'lxml')
     last_page = int(soup.select('td.pages a')[-1].text)
+    table_col_number = 1
     for page in range(0, last_page):
         current_page = url_start_page_of_ntd
         payload = {
@@ -21,7 +23,6 @@ def get_ntd(url_start_page_of_ntd):
         page_of_ntds_content = BeautifulSoup(page_of_ntds.text, 'lxml')
 
         for table in page_of_ntds_content.select('tr[bgcolor="#eeeeee"]'):
-
             ntd_url = parse.urljoin('https://protect.gost.ru/', table.select_one('td div a')['href'])
             ntd_number = table.select('td div[align="left"]')[0].text
             ntd_name = table.select('td div[align="left"]')[1].text
@@ -32,16 +33,26 @@ def get_ntd(url_start_page_of_ntd):
 
             for root in WORD_ROOT_FILTER:
                 if root in ntd_name.lower():
+
+                    # результат в формате словаря
                     ntd = {
                         'ntd_url': ntd_url,
                         'ntd_number': ntd_number,
                         'ntd_name': ntd_name,
                     }
+
+                    # результат в формате словаря списков для таблицы
+                    ntd_for_table = {
+                        'cols': ['{{r ntd'+str(table_col_number)+'}}', ntd_name]
+                    }
+
                     all_ntd.append(ntd)
-            #         break
+                    all_ntd_for_table['tbl_contents'].append(ntd_for_table)
+                    table_col_number += 1
+                    break
             # break
 
-    return all_ntd
+    return all_ntd, all_ntd_for_table
 
 
 def get_page(page_url, payload):

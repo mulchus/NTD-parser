@@ -3,8 +3,6 @@ import json
 import time
 import requests
 from docxtpl import DocxTemplate, RichText
-
-
 from pathlib import Path
 
 
@@ -13,14 +11,11 @@ URL_START_PAGE_OF_NTD_PROJECT = ''
 WORD_ROOT_FILTER = ('геодез', 'геолог', 'эколог', 'гидромет', 'почв', 'проект', 'изыск', 'GPS', )
 
 
-
 def main():
-
     # парсинг утвержденных НТД на Х месяц из URL_START_PAGE_OF_NTD
-    all_ntd = []
     while True:
         try:
-            all_ntd = parse_all_ntd.get_ntd(URL_START_PAGE_OF_NTD)
+            all_ntd, all_ntd_for_table = parse_all_ntd.get_ntd(URL_START_PAGE_OF_NTD)
         except requests.exceptions.HTTPError as error:
             print(f'Ошибка ссылки на страницу НТД. Ошибка {error}')
             break
@@ -30,23 +25,26 @@ def main():
             continue
         break
 
-    ntd_count = len(all_ntd)
-    print(f'Найдено стандартов (изменений): ', {ntd_count})
+    print(all_ntd)
+    # print(f'Найдено стандартов (изменений): {len((all_ntd["tbl_contents"])}')
+    with open(Path.joinpath(Path.cwd(), 'all_ntd_for_table.json'), 'w', encoding='utf-8') as json_file:
+        json.dump(all_ntd_for_table, json_file, ensure_ascii=False, indent=4)
     with open(Path.joinpath(Path.cwd(), 'all_ntd.json'), 'w', encoding='utf-8') as json_file:
         json.dump(all_ntd, json_file, ensure_ascii=False, indent=4)
 
     # сохранение НТД в файл в табличном виде по формату в файле
-    doc = DocxTemplate("ntd_tpl.docx")
+    tpl = DocxTemplate('ntd_tpl.docx')
+    tpl.render(all_ntd_for_table)
+    tpl.save('ntd.docx')
 
-    ntd_rich_text = []
-    for ntd in all_ntd:
+    context = {}
+    for table_col_number, ntd in enumerate(all_ntd):
+        doc = DocxTemplate('ntd.docx')
         ntd_rich_text = RichText()
-        ntd_rich_text.add(ntd['ntd_number'],url_id=doc.build_url_id(ntd['ntd_url']))
-        break
-    context = {
-        'example': ntd_rich_text
-    }
-    # print(ntd_rich_text)
+        ntd_rich_text.add(ntd['ntd_number'],url_id=doc.build_url_id(ntd['ntd_url']), color='#0000ff', underline=True)
+        context[f'ntd{str(table_col_number+1)}'] = ntd_rich_text
+
+    print(context)
     doc.render(context)
     doc.save('ntd.docx')
 
