@@ -1,9 +1,9 @@
 import requests
 import main
-from datetime import datetime
 
 from bs4 import BeautifulSoup
 from urllib import parse
+from docxtpl import DocxTemplate, RichText
 
 
 def get_ntd_notifications(url_start_page_of_ntd_notifications):
@@ -15,6 +15,7 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
     start_page_content = BeautifulSoup(start_page_of_ntd_notifications, 'lxml')
     current_month = int(start_page_content.select_one('tr[valign="top"] td a').text.split('/')[0])
 
+    # doc = DocxTemplate('ntd_tpl.docx')
     ntd_notifications_first_in_page_number = 1
     table_col_number = 1
     while True:
@@ -39,8 +40,13 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
                 if root in ntd_name.lower():
 
                     # результат в формате словаря
+                    # ntd_rich = RichText(notifications_public_date, url_id=doc.build_url_id(notifications_url), color="#0000ff", underline=True)
                     ntd = {
                         'notifications_public_date': notifications_public_date,
+                        # 'notifications_public_date': ntd_rich,
+                        # 'notifications_public_date': f'RichText({notifications_public_date}, '
+                        #                              f'url_id=doc.build_url_id({notifications_url}), '
+                        #                              f'color="#0000ff", underline=True)',
                         'notifications_url': notifications_url,
                         'notifications_type': notifications_type,
                         'ntd_name': ntd_name,
