@@ -3,11 +3,12 @@ import parse_all_ntd_notifications
 import json
 import time
 import requests
+
 from docxtpl import DocxTemplate, RichText
 from pathlib import Path
 
 
-URL_START_PAGE_OF_NTD = '!!https://protect.gost.ru/default.aspx?control=6&month=2&year=2023'
+URL_START_PAGE_OF_NTD = 'https://protect.gost.ru/default.aspx?control=6&month=3&year=2023'
 URL_START_PAGE_OF_NTD_NOTIFICATIONS = 'http://webportalsrv.gost.ru/portal/UVED_2007st.nsf/wMain?OpenView'
 SEEKING_WORD_ROOTS = ('геодез', 'геолог', 'эколог', 'гидромет', 'почв', 'грунт', 'здани', 'сооружен', 'проект',
                       'изыск', 'репутац', 'градостр', 'город', 'gps', 'глонасс', 'cнип', 'сп ', 'сейсм',
@@ -30,13 +31,10 @@ def main():
         break
 
     print(f'Найдено уведомлений стандартов: {len(all_notifications)}')
-    with open(Path.joinpath(Path.cwd(), 'all_notifications_for_table.json'), 'w', encoding='utf-8') as json_file:
-        json.dump(all_notifications_for_table, json_file, ensure_ascii=False, indent=4)
-    with open(Path.joinpath(Path.cwd(), 'all_notifications.json'), 'w', encoding='utf-8') as json_file:
-        json.dump(all_notifications, json_file, ensure_ascii=False, indent=4)
-
-    print(all_notifications)
-    print(all_notifications_for_table)
+    # with open(Path.joinpath(Path.cwd(), 'all_notifications_for_table.json'), 'w', encoding='utf-8') as json_file:
+    #     json.dump(all_notifications_for_table, json_file, ensure_ascii=False, indent=4)
+    # with open(Path.joinpath(Path.cwd(), 'all_notifications.json'), 'w', encoding='utf-8') as json_file:
+    #     json.dump(all_notifications, json_file, ensure_ascii=False, indent=4)
 
     # сохранение уведомлений об НТД в файл в табличном виде по формату в файле
     tpl = DocxTemplate('ntd_tpl.docx')
@@ -44,22 +42,15 @@ def main():
     # tpl.render(all_notifications)
     tpl.save('notifications.docx')
 
-    exit()
-
+    context = {}
     doc = DocxTemplate('notifications.docx')
     for table_col_number, notification in enumerate(all_notifications):
-        context = {}
-
         ntd_rich_text = RichText()
         ntd_rich_text.add(notification['notifications_public_date'],
                           url_id=doc.build_url_id(notification['notifications_url']), color='#0000ff', underline=True)
         context[f'ntd{str(table_col_number+1)}'] = ntd_rich_text
-        print(f'ntd{str(table_col_number+1)}')
-        print(context)
-        doc.render(context)
-        doc.save('notifications.docx')
-
-    exit()
+    doc.render(context)
+    doc.save('notifications.docx')
 
     # парсинг утвержденных НТД на Х месяц из URL_START_PAGE_OF_NTD
     while True:
@@ -77,8 +68,8 @@ def main():
     print(f'Найдено стандартов (изменений): {len(all_ntd)}')
     # with open(Path.joinpath(Path.cwd(), 'all_ntd_for_table.json'), 'w', encoding='utf-8') as json_file:
     #     json.dump(all_ntd_for_table, json_file, ensure_ascii=False, indent=4)
-    with open(Path.joinpath(Path.cwd(), 'all_ntd.json'), 'w', encoding='utf-8') as json_file:
-        json.dump(all_ntd, json_file, ensure_ascii=False, indent=4)
+    # with open(Path.joinpath(Path.cwd(), 'all_ntd.json'), 'w', encoding='utf-8') as json_file:
+    #     json.dump(all_ntd, json_file, ensure_ascii=False, indent=4)
 
     # сохранение НТД в файл в табличном виде по формату в файле
     tpl = DocxTemplate('ntd_tpl.docx')
@@ -86,10 +77,10 @@ def main():
     tpl.save('ntd.docx')
 
     context = {}
+    doc = DocxTemplate('ntd.docx')
     for table_col_number, ntd in enumerate(all_ntd):
-        doc = DocxTemplate('ntd.docx')
         ntd_rich_text = RichText()
-        ntd_rich_text.add(ntd['ntd_number'],url_id=doc.build_url_id(ntd['ntd_url']), color='#0000ff', underline=True)
+        ntd_rich_text.add(ntd['ntd_number'], url_id=doc.build_url_id(ntd['ntd_url']), color='#0000ff', underline=True)
         context[f'ntd{str(table_col_number+1)}'] = ntd_rich_text
     doc.render(context)
     doc.save('ntd.docx')

@@ -3,14 +3,11 @@ import main
 
 from bs4 import BeautifulSoup
 from urllib import parse
-from docxtpl import DocxTemplate, RichText
 
 
 def get_ntd_notifications(url_start_page_of_ntd_notifications):
     all_notifications = []
-    all_notifications_for_table = {'tbl_contents':[]}
-    splitresult = parse.urlsplit(url_start_page_of_ntd_notifications)
-    site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
+    all_notifications_for_table = {'tbl_contents': []}
     start_page_of_ntd_notifications = get_page(url_start_page_of_ntd_notifications, None).text
     start_page_content = BeautifulSoup(start_page_of_ntd_notifications, 'lxml')
     current_month = int(start_page_content.select_one('tr[valign="top"] td a').text.split('/')[0])
@@ -40,13 +37,8 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
                 if root in ntd_name.lower():
 
                     # результат в формате словаря
-                    # ntd_rich = RichText(notifications_public_date, url_id=doc.build_url_id(notifications_url), color="#0000ff", underline=True)
                     ntd = {
                         'notifications_public_date': notifications_public_date,
-                        # 'notifications_public_date': ntd_rich,
-                        # 'notifications_public_date': f'RichText({notifications_public_date}, '
-                        #                              f'url_id=doc.build_url_id({notifications_url}), '
-                        #                              f'color="#0000ff", underline=True)',
                         'notifications_url': notifications_url,
                         'notifications_type': notifications_type,
                         'ntd_name': ntd_name,
@@ -56,13 +48,11 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
                     notifications_for_table = {
                         'cols': ['{{r ntd'+str(table_col_number)+'}}', notifications_type, ntd_name]
                     }
-
                     all_notifications.append(ntd)
                     all_notifications_for_table['tbl_contents'].append(notifications_for_table)
                     table_col_number += 1
                     print(f'{notifications_public_date} - {ntd_name}')
                     break
-
         ntd_notifications_first_in_page_number += 29
 
 

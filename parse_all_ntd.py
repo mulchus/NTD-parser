@@ -7,9 +7,7 @@ from urllib import parse
 
 def get_ntd(url_start_page_of_ntd):
     all_ntd = []
-    all_ntd_for_table = {'tbl_contents':[]}
-    splitresult = parse.urlsplit(url_start_page_of_ntd)
-    site_url = parse.urlunsplit([splitresult.scheme, splitresult.netloc, '', '', ''])
+    all_ntd_for_table = {'tbl_contents': []}
     url_start_page_of_ntd_text = get_page(url_start_page_of_ntd, None).text
     soup = BeautifulSoup(url_start_page_of_ntd_text, 'lxml')
     last_page = int(soup.select('td.pages a')[-1].text)
@@ -29,7 +27,8 @@ def get_ntd(url_start_page_of_ntd):
             if not ntd_name:
                 page_of_izm_ntd = get_page(ntd_url, '')
                 page_of_izm_ntd_content = BeautifulSoup(page_of_izm_ntd.text, 'lxml')
-                ntd_name = page_of_izm_ntd_content.select('td[colspan="3"]')[-2].select_one('tr.first').select('td')[-1].text
+                ntd_name = page_of_izm_ntd_content.select(
+                    'td[colspan="3"]')[-2].select_one('tr.first').select('td')[-1].text
 
             for root in SEEKING_WORD_ROOTS:
                 if root in ntd_name.lower() or root in ntd_number.lower():
