@@ -12,7 +12,6 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
     start_page_content = BeautifulSoup(start_page_of_ntd_notifications, 'lxml')
     current_month = int(start_page_content.select_one('tr[valign="top"] td a').text.split('/')[0])
 
-    # doc = DocxTemplate('ntd_tpl.docx')
     ntd_notifications_first_in_page_number = 1
     table_col_number = 1
     while True:

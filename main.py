@@ -39,7 +39,6 @@ def main():
     # сохранение уведомлений об НТД в файл в табличном виде по формату в файле
     tpl = DocxTemplate('ntd_tpl.docx')
     tpl.render(all_notifications_for_table)
-    # tpl.render(all_notifications)
     tpl.save('notifications.docx')
 
     context = {}

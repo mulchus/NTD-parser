@@ -50,7 +50,6 @@ def get_ntd(url_start_page_of_ntd):
                     table_col_number += 1
                     print(f'{ntd_number} - {ntd_name}')
                     break
-            # break
 
     return all_ntd, all_ntd_for_table
 
