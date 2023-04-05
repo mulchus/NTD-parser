@@ -16,10 +16,10 @@ SEEKING_WORD_ROOTS = ('геодез', 'геолог', 'эколог', 'гидр�
 
 
 def main():
-    # парсинг утвержденных НТД на Х месяц из URL_START_PAGE_OF_NTD
+    print(f'парсинг утвержденных НТД на Х месяц из {URL_START_PAGE_OF_NTD}')
     while True:
         try:
-            all_ntd, all_ntd_for_table = parse_all_ntd.get_ntd(URL_START_PAGE_OF_NTD)
+            all_ntd, all_ntd_for_table, hidden_change_names = parse_all_ntd.get_ntd(URL_START_PAGE_OF_NTD)
         except requests.exceptions.HTTPError as error:
             print(f'Ошибка ссылки на страницу НТД. Ошибка {error}')
             break
@@ -30,10 +30,14 @@ def main():
         break
 
     print(f'Найдено стандартов (изменений): {len(all_ntd)}')
+    print(f'Всего изменений со скрытым названием: {len(hidden_change_names)}\n')
     # with open(Path.joinpath(Path.cwd(), 'all_ntd_for_table.json'), 'w', encoding='utf-8') as json_file:
     #     json.dump(all_ntd_for_table, json_file, ensure_ascii=False, indent=4)
     # with open(Path.joinpath(Path.cwd(), 'all_ntd.json'), 'w', encoding='utf-8') as json_file:
     #     json.dump(all_ntd, json_file, ensure_ascii=False, indent=4)
+    # сохранение в json названий изменений НТД со скрытыми названиями
+    with open(Path.joinpath(Path.cwd(), 'hidden_change_names.json'), 'w', encoding='utf-8') as json_file:
+        json.dump(hidden_change_names, json_file, ensure_ascii=False, indent=4)
 
     # сохранение НТД в файл в табличном виде по формату в файле
     tpl = DocxTemplate('ntd_tpl.docx')
@@ -49,7 +53,7 @@ def main():
     doc.render(context)
     doc.save('ntd.docx')
 
-    # парсинг проектов НТД на Х месяц из URL_START_PAGE_OF_NTD_PROJECTS
+    print(f'парсинг уведомлений об утвержденых НТД на Х месяц из {URL_START_PAGE_OF_NTD_NOTIFICATIONS}')
     while True:
         try:
             all_notifications, all_notifications_for_table = \
@@ -63,7 +67,7 @@ def main():
             continue
         break
 
-    print(f'Найдено уведомлений стандартов: {len(all_notifications)}')
+    print(f'Найдено уведомлений стандартов: {len(all_notifications)}\n')
     # with open(Path.joinpath(Path.cwd(), 'all_notifications_for_table.json'), 'w', encoding='utf-8') as json_file:
     #     json.dump(all_notifications_for_table, json_file, ensure_ascii=False, indent=4)
     # with open(Path.joinpath(Path.cwd(), 'all_notifications.json'), 'w', encoding='utf-8') as json_file:
