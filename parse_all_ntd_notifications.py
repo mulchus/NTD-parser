@@ -11,6 +11,7 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
     start_page_of_ntd_notifications = get_page(url_start_page_of_ntd_notifications, None).text
     start_page_content = BeautifulSoup(start_page_of_ntd_notifications, 'lxml')
     current_month = int(start_page_content.select_one('tr[valign="top"] td a').text.split('/')[0])
+    print(f'Исследуем текущий месяц № {current_month}. Если необходимо и за прошлый месяц - сделать "current_month - 1"')
 
     ntd_notifications_first_in_page_number = 1
     table_col_number = 1
@@ -25,7 +26,8 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
             notifications_public_date = table_row.select_one('td a').text
 
             # проверка даты на предыдущий месяц и возврат при True
-            if int(notifications_public_date.split('/')[0]) < current_month:
+            # !! Если необходимо исследовать и за прошлый месяц - сделать "current_month - 1"
+            if int(notifications_public_date.split('/')[0]) < current_month - 1: # - 1:
                 return all_notifications, all_notifications_for_table
 
             notifications_url = parse.urljoin('http://webportalsrv.gost.ru/', table_row.select_one('td a')['href'])
