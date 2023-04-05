@@ -12,7 +12,7 @@ URL_START_PAGE_OF_NTD = 'https://protect.gost.ru/default.aspx?control=6&month=3&
 URL_START_PAGE_OF_NTD_NOTIFICATIONS = 'http://webportalsrv.gost.ru/portal/UVED_2007st.nsf/wMain?OpenView'
 SEEKING_WORD_ROOTS = ('геодез', 'геолог', 'эколог', 'гидромет', 'почв', 'грунт', 'здани', 'сооружен', 'проект',
                       'изыск', 'репутац', 'градостр', 'город', 'gps', 'глонасс', 'cнип', 'сп ', 'сейсм',
-                      'землетряс', 'земл', 'земн', 'обслед', )
+                      'землетряс', 'земл', 'земн', 'обслед', 'строит', )
 
 
 def main():
