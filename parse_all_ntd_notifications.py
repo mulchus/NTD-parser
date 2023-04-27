@@ -11,7 +11,8 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
     start_page_of_ntd_notifications = get_page(url_start_page_of_ntd_notifications, None).text
     start_page_content = BeautifulSoup(start_page_of_ntd_notifications, 'lxml')
     current_month = int(start_page_content.select_one('tr[valign="top"] td a').text.split('/')[0])
-    print(f'Исследуем текущий месяц № {current_month}. Если необходимо и за прошлый месяц - сделать "current_month - 1"')
+    print(f'Исследуем текущий месяц № {current_month} и предшествующий ему месяц.')
+    # иначе - удалить в parse_all_ntd_notifications.py "if int(notifications.....[0]) < current_month" значение "-1"')
 
     ntd_notifications_first_in_page_number = 1
     table_col_number = 1
