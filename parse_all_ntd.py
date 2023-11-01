@@ -1,6 +1,4 @@
-import requests
-from main import SEEKING_WORD_ROOTS
-
+from common_tools import SEEKING_WORD_ROOTS, get_page
 from bs4 import BeautifulSoup
 from urllib import parse
 
@@ -58,15 +56,3 @@ def get_ntd(url_start_page_of_ntd):
                     break
 
     return all_ntd, all_ntd_for_table, hidden_change_names
-
-
-def get_page(page_url, payload):
-    page = requests.get(page_url, params=payload)
-    page.raise_for_status()
-    check_for_redirect(page)
-    return page
-
-
-def check_for_redirect(page):
-    if page.url == 'https://protect.gost.ru/':
-        raise requests.HTTPError('Err:01 - Нет информации на данной странице', page.request)

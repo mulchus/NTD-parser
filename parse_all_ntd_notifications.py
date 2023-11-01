@@ -1,6 +1,4 @@
-import requests
-import main
-
+from common_tools import SEEKING_WORD_ROOTS, get_page
 from bs4 import BeautifulSoup
 from urllib import parse
 
@@ -35,7 +33,7 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
             notifications_type = table_row.select('td')[1].text
             ntd_name = table_row.select('td')[2].text
 
-            for root in main.SEEKING_WORD_ROOTS:
+            for root in SEEKING_WORD_ROOTS:
                 if root in ntd_name.lower():
 
                     # результат в формате словаря
@@ -56,15 +54,3 @@ def get_ntd_notifications(url_start_page_of_ntd_notifications):
                     print(f'{notifications_public_date} - {ntd_name}')
                     break
         ntd_notifications_first_in_page_number += 29
-
-
-def get_page(page_url, payload):
-    page = requests.get(page_url, params=payload)
-    page.raise_for_status()
-    check_for_redirect(page)
-    return page
-
-
-def check_for_redirect(page):
-    if page.url == 'https://protect.gost.ru/':
-        raise requests.HTTPError('Err:01 - Нет информации на данной странице', page.request)
